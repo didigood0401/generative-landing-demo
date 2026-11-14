@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Три варианта главной - генеративный стиль</title>
+<meta name="description" content="Демо: три варианта главной страницы лендинга в генеративной стилистике по мудборду.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0b0b0c;--paper:#f2efe8;--mut:#77756f;--eo:cubic-bezier(0,0,.2,1);--eq:cubic-bezier(.165,.84,.44,1);--mono:'JetBrains Mono',monospace;--sans:'Inter Tight',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font:400 16px/1.5 var(--sans);background:var(--paper);color:var(--ink);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.sw{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:50;display:flex;gap:4px;padding:5px;border-radius:999px;background:rgba(20,20,22,.72);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);box-shadow:0 20px 50px -20px rgba(0,0,0,.6)}
+.sw button{white-space:nowrap;padding:10px 18px;border-radius:999px;font:500 12px var(--mono);letter-spacing:.06em;color:#bdbbb5;transition:background-color .2s var(--eo),color .2s var(--eo)}
+.sw button.on{background:#fff;color:#000}
+.v{position:relative;min-height:100svh;display:none;overflow:hidden}
+.v.on{display:block}
+canvas.fx{position:absolute;inset:0;width:100%;height:100%;display:block}
+.nav{position:absolute;inset:0 0 auto;z-index:3;display:flex;align-items:center;gap:28px;padding:22px clamp(16px,3vw,40px);font:500 12px var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.nav .lg{font:600 15px var(--sans);letter-spacing:-.01em;text-transform:none;display:flex;align-items:center;gap:8px}
+.nav .lg i{width:14px;height:14px;display:inline-block}
+.nav ul{display:flex;gap:22px;list-style:none;margin-left:auto}
+.nav .cta{padding:10px 16px;border-radius:999px}
+.in{opacity:0;transform:translateY(30px)}
+.v.on .in{opacity:1;transform:none;transition:opacity 1.2s var(--eo),transform 1.2s var(--eo);transition-delay:calc(var(--i,0)*120ms)}
+.lbl{font:500 11.5px var(--mono);letter-spacing:.12em;text-transform:uppercase}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 22px;border-radius:999px;font-weight:600;font-size:15px;transition:background-color .2s var(--eo),color .2s var(--eo),transform .4s var(--eq)}
+.btn:hover{transform:translateY(-2px)}
+.btn .a{transition:transform .4s var(--eq)}.btn:hover .a{transform:translateX(4px)}
+
+/* A - dither field (светлый) */
+#A{background:#f2efe8}
+#A .nav .lg i{background:#ff3d7f}
+#A .nav .cta{background:var(--ink);color:#fff}
+#A .hero:before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(70% 60% at 0% 100%,rgba(242,239,232,.94) 30%,rgba(242,239,232,0) 75%)}
+#A .hero{position:relative;z-index:2;isolation:isolate;min-height:100svh;display:grid;grid-template-rows:1fr auto;padding:110px clamp(16px,3vw,40px) 96px}
+#A h1{font:500 clamp(54px,10.5vw,176px)/.86 var(--sans);letter-spacing:-.055em;align-self:end;max-width:9.5ch;mix-blend-mode:multiply}
+#A h1 em{font:italic 400 1em/1 'Instrument Serif',serif;letter-spacing:-.02em}
+#A .row{display:flex;justify-content:space-between;align-items:end;gap:30px;margin-top:34px;flex-wrap:wrap}
+#A .row p{max-width:40ch;font-size:clamp(16px,1.3vw,19px);color:#2b2a27}
+#A .btn.p{background:var(--ink);color:#fff}#A .btn.s{box-shadow:inset 0 0 0 1px var(--ink);background:rgba(242,239,232,.9)}
+#A .meta{position:absolute;right:clamp(16px,3vw,40px);top:96px;z-index:2;text-align:right;color:#3a3833;display:grid;gap:4px}
+
+/* B - data mosaic (тёмный) */
+#B{background:#07070a;color:#e9e7ff}
+#B .nav .lg i{background:linear-gradient(135deg,#7b5cff,#ff5f2e)}
+#B .nav .cta{background:#e9e7ff;color:#07070a}
+#B .wrap{position:relative;z-index:2;min-height:100svh;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:30px;align-items:end;padding:110px clamp(16px,3vw,40px) 100px}
+#B h1{font:500 clamp(46px,7.2vw,124px)/.9 var(--sans);letter-spacing:-.05em}
+#B h1 span{color:transparent;-webkit-text-stroke:1.2px #e9e7ff}
+#B p{color:#a7a4c4;max-width:42ch;margin-top:26px;font-size:clamp(15px,1.2vw,18px)}
+#B .btn.p{background:#e9e7ff;color:#07070a}#B .btn.s{box-shadow:inset 0 0 0 1px rgba(233,231,255,.35)}
+#B .panel{justify-self:end;width:min(380px,100%);border-radius:18px;padding:18px;background:rgba(18,17,28,.62);backdrop-filter:blur(24px) saturate(1.5);-webkit-backdrop-filter:blur(24px) saturate(1.5);box-shadow:inset 0 0 0 1px rgba(233,231,255,.12)}
+#B .panel .k{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(233,231,255,.08);font:400 13px var(--mono);color:#a7a4c4}
+#B .panel .k b{color:#fff;font-weight:500}
+#B .bars{display:flex;gap:3px;align-items:end;height:60px;margin-top:14px}
+#B .bars i{flex:1;background:linear-gradient(#ff5f2e,#7b5cff);border-radius:2px;transform-origin:bottom;animation:bar 2.4s var(--eo) infinite alternate;animation-delay:calc(var(--d)*-160ms)}
+@keyframes bar{from{transform:scaleY(.25)}to{transform:scaleY(1)}}
+
+/* C - signal (бумага, брутализм) */
+#C{background:#ebe6da;color:#141311}
+#C .nav .lg i{background:#141311;border-radius:50%}
+#C .nav .cta{box-shadow:inset 0 0 0 1px #141311}
+#C .grid{position:relative;z-index:2;min-height:100svh;display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:auto 1fr auto;gap:0 16px;padding:100px clamp(16px,3vw,40px) 96px}
+#C .top{grid-column:1/-1;display:flex;justify-content:space-between;border-top:1.5px solid #141311;padding-top:10px}
+#C h1{grid-column:1/-1;align-self:center;font:600 clamp(60px,13.5vw,240px)/.8 var(--sans);letter-spacing:-.065em;text-transform:uppercase;mix-blend-mode:multiply}
+#C .bot{grid-column:1/-1;background:#ebe6da;display:grid;grid-template-columns:repeat(3,1fr) auto;gap:16px;border-top:1.5px solid #141311;padding-top:14px;align-items:start}
+#C .bot p{font-size:14.5px;max-width:30ch}
+#C .btn.p{background:#141311;color:#ebe6da}
+
+.note{position:fixed;left:16px;top:50%;transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;z-index:40;font:500 10.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;opacity:.55;mix-blend-mode:difference;color:#fff;pointer-events:none}
+@media(max-width:860px){
+ .sw button{padding:9px 12px;font-size:11px}
+ .nav ul{display:none}
+ #B .wrap{grid-template-columns:1fr;align-items:end}
+ #B .panel{justify-self:stretch;width:100%}
+ #C .bot{grid-template-columns:1fr 1fr}
+ #A .meta{display:none}
+ .note{display:none}
+}
+@media(prefers-reduced-motion:reduce){.in{opacity:1!important;transform:none!important;transition:none!important}#B .bars i{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="note">Демо · 3 варианта главной · без вашего текста и логотипа</div>
+
+<section class="v on" id="A" aria-label="Вариант A">
+ <canvas class="fx" id="cA" aria-hidden="true"></canvas>
+ <nav class="nav"><a class="lg" href="#"><i></i>Название</a><ul><li>Подход</li><li>Продукт</li><li>Кейсы</li><li>Команда</li></ul><a class="cta" href="#">Связаться</a></nav>
+ <div class="meta lbl in" style="--i:3"><span>N° 001 — 2026</span><span>Data / Research / Design</span></div>
+ <div class="hero">
+  <h1 class="in">Данные, которые <em>видно</em></h1>
+  <div class="row">
+   <p class="in" style="--i:1">Здесь будет ваше позиционирование в одной фразе - кто вы, для кого и какой результат даёте. Ниже - второй экран с доказательствами.</p>
+   <div class="in" style="--i:2;display:flex;gap:8px;flex-wrap:wrap"><a class="btn p" href="#">Обсудить проект <span class="a">→</span></a><a class="btn s" href="#">Смотреть кейсы</a></div>
+  </div>
+ </div>
+</section>
+
+<section class="v" id="B" aria-label="Вариант B">
+ <canvas class="fx" id="cB" aria-hidden="true"></canvas>
+ <nav class="nav"><a class="lg" href="#"><i></i>Название</a><ul><li>Платформа</li><li>Исследования</li><li>Open call</li><li>О нас</li></ul><a class="cta" href="#">Запросить демо</a></nav>
+ <div class="wrap">
+  <div>
+   <div class="lbl in" style="color:#8f8bb8">Платформа · 2026</div>
+   <h1 class="in" style="--i:1;margin-top:18px">Шум <span>превращаем</span> в&nbsp;структуру</h1>
+   <p class="in" style="--i:2">Вариант для технологичного позиционирования: тёмный экран, живая мозаика данных и панель с метриками вместо абстрактных иллюстраций.</p>
+   <div class="in" style="--i:3;display:flex;gap:8px;flex-wrap:wrap;margin-top:30px"><a class="btn p" href="#">Запросить демо <span class="a">→</span></a><a class="btn s" href="#">Как это работает</a></div>
+  </div>
+  <div class="panel in" style="--i:4">
+   <div class="lbl" style="color:#8f8bb8;margin-bottom:6px">Live · обновляется</div>
+   <div class="k"><span>источников</span><b id="kB1">1 284</b></div>
+   <div class="k"><span>событий / сек</span><b id="kB2">42 610</b></div>
+   <div class="k"><span>точность</span><b>99,2%</b></div>
+   <div class="bars" aria-hidden="true"><i style="--d:1"></i><i style="--d:2"></i><i style="--d:3"></i><i style="--d:4"></i><i style="--d:5"></i><i style="--d:6"></i><i style="--d:7"></i><i style="--d:8"></i><i style="--d:9"></i><i style="--d:10"></i><i style="--d:11"></i><i style="--d:12"></i><i style="--d:13"></i><i style="--d:14"></i><i style="--d:15"></i><i style="--d:16"></i></div>
+  </div>
+ </div>
+</section>
+
+<section class="v" id="C" aria-label="Вариант C">
+ <canvas class="fx" id="cC" aria-hidden="true"></canvas>
+ <nav class="nav"><a class="lg" href="#"><i></i>Название</a><ul><li>Индекс</li><li>Архив</li><li>Программа</li><li>Контакт</li></ul><a class="cta" href="#">Участвовать</a></nav>
+ <div class="grid">
+  <div class="top lbl in"><span>Vol. 01</span><span>Signal / Pattern / Form</span><span>RU · EN</span></div>
+  <h1 class="in" style="--i:1">Сигнал<br>и форма</h1>
+  <div class="bot">
+   <p class="in" style="--i:2"><span class="lbl">01</span><br>Редакционный вариант: бумажный фон, крупный гротеск и сетка, как у афиш и научных журналов.</p>
+   <p class="in" style="--i:3"><span class="lbl">02</span><br>Генеративные волны реагируют на курсор - живой, но спокойный экран.</p>
+   <p class="in" style="--i:4"><span class="lbl">03</span><br>Легко масштабируется в айдентику: те же линии на носителях и в соцсетях.</p>
+   <a class="btn p in" style="--i:5" href="#">Участвовать <span class="a">→</span></a>
+  </div>
+ </div>
+</section>
+
+<div class="sw" role="tablist" aria-label="Варианты главной">
+ <button class="on" type="button" data-v="A">A · Dither</button>
+ <button type="button" data-v="B">B · Mosaic</button>
+ <button type="button" data-v="C">C · Signal</button>
+</div>
+
+<script>
+(()=>{
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let mx=.5,my=.5;addEventListener('pointermove',e=>{mx=e.clientX/innerWidth;my=e.clientY/innerHeight},{passive:true});
+// value noise
+const P=new Uint8Array(512);for(let i=0;i<256;i++)P[i]=i;for(let i=255;i>0;i--){const j=Math.random()*(i+1)|0;[P[i],P[j]]=[P[j],P[i]]}for(let i=0;i<256;i++)P[i+256]=P[i];
+const fade=t=>t*t*(3-2*t),lerp=(a,b,t)=>a+(b-a)*t,h=(x,y)=>P[P[x&255]+(y&255)]/255;
+function noise(x,y){const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi,u=fade(xf),v=fade(yf);return lerp(lerp(h(xi,yi),h(xi+1,yi),u),lerp(h(xi,yi+1),h(xi+1,yi+1),u),v)}
+function fit(c,s){const r=c.getBoundingClientRect();c.width=Math.max(1,Math.round(r.width/s));c.height=Math.max(1,Math.round(r.height/s))}
+const BAYER=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5].map(v=>v/16);
+// A: ordered dither gradient field
+const cA=document.getElementById('cA'),xA=cA.getContext('2d');
+const palA=[[242,239,232],[255,61,127],[255,143,46],[58,72,255],[11,11,12]];
+function drawA(t){const S=4;if(cA.width!==Math.round(cA.clientWidth/S))fit(cA,S);const w=cA.width,hh=cA.height,img=xA.createImageData(w,hh),d=img.data;
+ for(let y=0;y<hh;y++)for(let x=0;x<w;x++){const nx=x/w,ny=y/hh;
+  let v=noise(nx*3+t*.00012+mx*.6,ny*2.4-t*.00008+my*.4)*.75+noise(nx*9,ny*9+t*.0002)*.25;
+  v=v*.9+(nx*.35)-(.25)+(1-ny)*.05; v=Math.max(0,Math.min(.999,v));
+  const th=BAYER[(y&3)*4+(x&3)],lv=v*(palA.length-1),i0=Math.floor(lv),f=lv-i0,c=palA[f>th?Math.min(i0+1,palA.length-1):i0];
+  const k=(y*w+x)*4;d[k]=c[0];d[k+1]=c[1];d[k+2]=c[2];d[k+3]=255}
+ xA.putImageData(img,0,0)}
+cA.style.imageRendering='pixelated';
+// B: data mosaic
+const cB=document.getElementById('cB'),xB=cB.getContext('2d');
+function drawB(t){fit(cB,1);const w=cB.width,hh=cB.height,cs=Math.max(14,Math.round(w/64));xB.fillStyle='#07070a';xB.fillRect(0,0,w,hh);
+ for(let y=0;y<hh;y+=cs)for(let x=0;x<w;x+=cs){const v=noise(x/cs*.11+t*.00015,y/cs*.11-t*.0001),g=noise(x/cs*.5,y/cs*.5+t*.0004);
+  if(v<.42)continue;const k=(v-.42)/.58,dx=x/w-mx,dy=y/hh-my,near=Math.max(0,1-Math.hypot(dx,dy)*3);
+  const hue=255+k*120+near*40;xB.fillStyle=`hsla(${hue%360},${70+near*30}%,${30+k*35+near*15}%,${.35+k*.6})`;
+  const s=cs*(g>.55?.92:.5);xB.fillRect(x+(cs-s)/2,y+(cs-s)/2,s,s)}
+ const gr=xB.createLinearGradient(0,0,w*.6,0);gr.addColorStop(0,'rgba(7,7,10,.92)');gr.addColorStop(1,'rgba(7,7,10,0)');xB.fillStyle=gr;xB.fillRect(0,0,w,hh)}
+// C: signal lines
+const cC=document.getElementById('cC'),xC=cC.getContext('2d');
+function drawC(t){fit(cC,1);const w=cC.width,hh=cC.height;xC.clearRect(0,0,w,hh);const L=46,top=hh*.14,gap=(hh*.78)/L;xC.lineWidth=1.2;
+ for(let i=0;i<L;i++){const y0=top+i*gap;xC.beginPath();
+  for(let x=0;x<=w;x+=6){const nx=x/w,c=Math.exp(-Math.pow((nx-(.35+mx*.3))*3.2,2)),amp=gap*6*c*(.4+noise(i*.3,t*.0004)*.9);
+   const y=y0-Math.abs(noise(nx*8+i*.7,t*.0006+i*.1)-.35)*amp*1.6; x?xC.lineTo(x,y):xC.moveTo(x,y)}
+  xC.lineTo(w,hh);xC.lineTo(0,hh);xC.closePath();xC.fillStyle='#ebe6da';xC.fill();xC.strokeStyle=i%9===4?'#e2401c':'rgba(20,19,17,.85)';xC.stroke()}}
+const draws={A:drawA,B:drawB,C:drawC};let cur='A';
+let kt=0;function tick(t){draws[cur](t);if(cur==='B'&&t-kt>700){kt=t;document.getElementById('kB2').textContent=(42000+Math.round(Math.random()*1400)).toLocaleString('ru-RU')}if(!RM)requestAnimationFrame(tick)}
+requestAnimationFrame(tick);
+document.querySelectorAll('.sw button').forEach(b=>b.addEventListener('click',()=>{const v=b.dataset.v;if(v===cur)return;
+ document.querySelectorAll('.sw button').forEach(x=>x.classList.toggle('on',x===b));
+ document.querySelectorAll('.v').forEach(s=>s.classList.remove('on'));const el=document.getElementById(v);void el.offsetWidth;el.classList.add('on');cur=v;if(RM)draws[v](0)}));
+addEventListener('resize',()=>{if(RM)draws[cur](0)});
+})();
+</script>
+</body>
+</html>
